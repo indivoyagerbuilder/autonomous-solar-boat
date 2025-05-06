@@ -1,32 +1,51 @@
 #include "RCOverride.h"
 #include "Config.h"
 
-#define RC_TIMEOUT_MS 1000  // Max time between signals before we consider RC lost
+#define RC_TIMEOUT_MS 1000
 
-volatile int rcPulseWidth = 1500;    // Default/neutral
-volatile unsigned long lastPulseTime = 0;
+volatile int pwmThrottle = 1500;
+volatile int pwmRudder = 1500;
+volatile unsigned long lastRCUpdate = 0;
 
-void IRAM_ATTR rcInterruptHandler() {
-  rcPulseWidth = pulseIn(RC_OVERRIDE_PIN, HIGH, 25000); // Max 25 ms wait
-  lastPulseTime = millis();
+void IRAM_ATTR throttleISR() {
+  pwmThrottle = pulseIn(RC_THROTTLE_PIN, HIGH, 25000);
+  lastRCUpdate = millis();
+}
+
+void IRAM_ATTR rudderISR() {
+  pwmRudder = pulseIn(RC_RUDDER_PIN, HIGH, 25000);
+  lastRCUpdate = millis();
 }
 
 void setupRCOverride() {
-  pinMode(RC_OVERRIDE_PIN, INPUT);
-  attachInterrupt(digitalPinToInterrupt(RC_OVERRIDE_PIN), rcInterruptHandler, CHANGE);
+  pinMode(RC_THROTTLE_PIN, INPUT);
+  pinMode(RC_RUDDER_PIN, INPUT);
+  attachInterrupt(digitalPinToInterrupt(RC_THROTTLE_PIN), throttleISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(RC_RUDDER_PIN), rudderISR, CHANGE);
 }
 
 void updateRCOverride() {
-  // Not much needed here unless we want to smooth or debounce
+  // nothing needed for now
 }
 
 bool isRCOverrideActive() {
-  // Consider active if we received a signal recently and it's in a valid range
-  int timeSinceLast = millis() - lastPulseTime;
-  return (rcPulseWidth >= 1000 && rcPulseWidth <= 2000 && timeSinceLast < RC_TIMEOUT_MS);
+  return (millis() - lastRCUpdate < RC_TIMEOUT_MS &&
+          pwmThrottle >= 1000 && pwmThrottle <= 2000 &&
+          pwmRudder >= 1000 && pwmRudder <= 2000);
 }
 
-int getRCOverridePWM() {
-  return rcPulseWidth;
+int getRCThrottlePWM() {
+  return pwmThrottle;
 }
 
+int getRCRudderPWM() {
+  return pwmRudder;
+}
+
+float getRCThrottleValue() {
+  return constrain((pwmThrottle - 1000) / 1000.0, 0.0, 1.0);
+}
+
+float getRCRudderValue() {
+  return constrain((pwmRudder - 1500) / 500.0, -1.0, 1.0);
+}

@@ -23,4 +23,8 @@ void setupBatteryMonitors();
 // Read from a specific sensor by name (not address)
 PowerData readPowerSensor(SensorID id);
 
+// Convenience helper to get battery voltage only
+float getBatteryVoltage();
+
 #endif
+

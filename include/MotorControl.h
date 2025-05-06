@@ -3,13 +3,13 @@
 
 #include <Arduino.h>
 
-// Initialize motor control (call in setup)
+// Setup motor PWM
 void setupMotor();
 
-// Set motor thrust (0.0 to 1.0 = forward power)
-void setMotorPower(float power);
+// Set power from 0.0 to 1.0 (auto-managed based on battery)
+void updateMotorPower(float requestedPower);
 
-// Stop motor completely
+// Stop motor
 void stopMotor();
 
 #endif

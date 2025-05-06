@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <string>
 
-// Build a telemetry message (CSV format) for Rockblock
+// Build a compressed telemetry message for Rockblock
 std::string buildTelemetryMessage();
 
 #endif

@@ -1,34 +1,40 @@
 #include "MotorControl.h"
 #include "Config.h"
+#include "BatteryMonitor.h"
+#include "PWMUtils.h"  // <- brings in microsecondsToDuty()
 
-// PWM setup
-#define PWM_CHANNEL     0          // LEDC channel (ESP32 supports 16)
-#define PWM_FREQ        50         // 50 Hz for ESCs
-#define PWM_RESOLUTION  16         // 16-bit resolution (0–65535 range)
-
-// Convert microseconds (ESC pulse width) to duty cycle
-uint32_t microsecondsToDuty(int microseconds) {
-  // For 50Hz, period = 20,000 µs (20ms)
-  // Full duty = 65535 -> 20000 µs
-  return (microseconds * 65535UL) / 20000UL;
-}
+#define PWM_CHANNEL_MOTOR    0
+#define PWM_FREQ             50
+#define PWM_RESOLUTION       16  // 16-bit (0–65535)
 
 void setupMotor() {
-  ledcSetup(PWM_CHANNEL, PWM_FREQ, PWM_RESOLUTION);         // Set up PWM
-  ledcAttachPin(MOTOR_PWM_PIN, PWM_CHANNEL);                 // Attach pin
-  stopMotor();
+  ledcSetup(PWM_CHANNEL_MOTOR, PWM_FREQ, PWM_RESOLUTION);
+  ledcAttachPin(MOTOR_PWM_PIN, PWM_CHANNEL_MOTOR);
+  ledcWrite(PWM_CHANNEL_MOTOR, microsecondsToDuty(MOTOR_PWM_MIN)); // Start at idle
 }
 
-// power: 0.0 = stopped, 1.0 = full forward
-void setMotorPower(float power) {
-  power = constrain(power, 0.0, 1.0);                        // Clamp power
-  int pulseWidth = MOTOR_PWM_MIN + power * (MOTOR_PWM_MAX - MOTOR_PWM_MIN);
-  uint32_t duty = microsecondsToDuty(pulseWidth);
-  ledcWrite(PWM_CHANNEL, duty);
-}
+// Throttle: 0.0 to 1.0
+void updateMotorPower(float requestedPower) {
+  float voltage = getBatteryVoltage();
 
-// Immediately stop motor
-void stopMotor() {
-  uint32_t duty = microsecondsToDuty(MOTOR_PWM_MIN);        // Minimum PWM signal
-  ledcWrite(PWM_CHANNEL, duty);
+  if (voltage < BATTERY_VOLTAGE_EMPTY) {
+    Serial.println("Battery low – motor off");
+    ledcWrite(PWM_CHANNEL_MOTOR, microsecondsToDuty(MOTOR_PWM_MIN));
+    return;
+  }
+
+  float voltagePercent = (voltage - BATTERY_VOLTAGE_EMPTY) / (BATTERY_VOLTAGE_FULL - BATTERY_VOLTAGE_EMPTY);
+  voltagePercent = constrain(voltagePercent, 0.0, 1.0);
+
+  float maxPower;
+  if (voltagePercent > 0.8) maxPower = 0.9;
+  else if (voltagePercent > 0.6) maxPower = 0.7;
+  else if (voltagePercent > 0.4) maxPower = 0.5;
+  else if (voltagePercent > 0.3) maxPower = 0.3;
+  else maxPower = 0.0;
+
+  float effectivePower = constrain(requestedPower, 0.0, maxPower);
+  int pwm = MOTOR_PWM_MIN + (MOTOR_PWM_MAX - MOTOR_PWM_MIN) * effectivePower;
+
+  ledcWrite(PWM_CHANNEL_MOTOR, microsecondsToDuty(pwm));
 }

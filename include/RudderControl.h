@@ -1,16 +1,15 @@
-#ifndef ROCKBLOCK_COMM_H
-#define ROCKBLOCK_COMM_H
+#ifndef RUDDER_CONTROL_H
+#define RUDDER_CONTROL_H
 
 #include <Arduino.h>
-#include <string>
 
-// Setup Rockblock modem
-void setupRockblock();
+// Call once to configure rudder PWM pin and center position
+void setupRudder();
 
-// Call this in loop to attempt sending queued messages
-void processRockblockQueue();
+// Set rudder position from -1.0 (full left) to 1.0 (full right)
+void setRudderPosition(float position);
 
-// Add a message to the send queue
-void queueRockblockMessage(const std::string& message);
+// Centers the rudder at neutral position (0.0)
+void centerRudder();
 
 #endif

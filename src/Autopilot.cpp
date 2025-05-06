@@ -76,7 +76,7 @@ int getCurrentWaypointIndex() {
 
 void runAutopilot() {
   if (allWaypointsReached()) {
-    stopMotor();
+    updateMotorPower(0.0);
     centerRudder();
     return;
   }
@@ -86,7 +86,7 @@ void runAutopilot() {
 
   if (!gps.valid || !imu.valid) {
     Serial.println("Waiting for valid GPS or IMU...");
-    stopMotor();
+    updateMotorPower(0.0);
     return;
   }
 
@@ -129,7 +129,7 @@ void runAutopilot() {
   rudderCmd = constrain(rudderCmd / 45.0, -1.0, 1.0);
 
   setRudderPosition(rudderCmd);
-  setMotorPower(MOTOR_CRUISE_POWER);
+  updateMotorPower(MOTOR_CRUISE_POWER);  // Replaces setMotorPower()
 
   // Debug
   Serial.println("=== AUTOPILOT PID ===");

@@ -8,6 +8,7 @@
 
 // Rudder Servo
 #define RUDDER_SERVO_PIN     26  // GPIO pin connected to rudder servo
+#define RUDDER_PWM_PIN       26  // Used by newer modules
 
 // GPS UART
 #define GPS_RX_PIN           16  // ESP32 receives from GPS
@@ -22,17 +23,18 @@
 #define I2C_SDA_PIN          21
 #define I2C_SCL_PIN          22
 
-// RC Manual Override (PWM input)
-#define RC_OVERRIDE_PIN      33  // Connected to RC receiver channel
+// RC Manual Override
+#define RC_THROTTLE_PIN      32  // RC channel for throttle input
+#define RC_RUDDER_PIN        33  // RC channel for rudder input
 
 // === Motor PWM Settings ===
 #define MOTOR_PWM_MIN        1000  // µs signal for stop/idle
 #define MOTOR_PWM_MAX        2000  // µs signal for full thrust
 
 // === Rudder PWM Settings ===
-#define RUDDER_PWM_MIN       1000  // µs for full left (not used directly)
+#define RUDDER_PWM_MIN       1000  // µs for full left
 #define RUDDER_PWM_CENTER    1500  // µs center
-#define RUDDER_PWM_MAX       2000  // µs for full right (not used directly)
+#define RUDDER_PWM_MAX       2000  // µs for full right
 
 // === Battery Settings ===
 #define BATTERY_VOLTAGE_FULL   12.6  // Fully charged 12V LiFePO4
@@ -43,7 +45,5 @@
 #define TELEMETRY_INTERVAL_MS      60000   // How often to send Rockblock data
 #define CONTROL_LOOP_INTERVAL_MS   200     // Autopilot loop rate
 
-#define RC_OVERRIDE_PIN 33  // Adjust based on your wiring
-
-
 #endif
+

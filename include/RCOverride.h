@@ -3,16 +3,21 @@
 
 #include <Arduino.h>
 
-// Call in setup to initialize RC input
+// Call in setup() to initialize RC input
 void setupRCOverride();
 
-// Call in loop to update the current RC state
+// Call in loop() to update latest values
 void updateRCOverride();
 
-// Returns true if a valid RC signal is detected
+// True if valid signals are present
 bool isRCOverrideActive();
 
-// Get latest PWM value (1000–2000 µs)
-int getRCOverridePWM();
+// Get raw PWM values (1000–2000 µs) for rudder and throttle
+int getRCRudderPWM();
+int getRCThrottlePWM();
+
+// Get normalized control values: -1 to 1 for rudder, 0 to 1 for throttle
+float getRCRudderValue();
+float getRCThrottleValue();
 
 #endif

@@ -9,9 +9,11 @@ std::string buildTelemetryMessage() {
   IMUData imu = getIMUData();
   PowerData power = readPowerSensor(SENSOR_BATTERY);
 
-  char buffer[256];
+  // Short, fixed-width compressed format:
+  // T:<ms> L:<lat> G:<lon> H:<head> S:<spd> V:<volt> C:<curr> W:<wp> S:<stat>
+  char buffer[160];
   snprintf(buffer, sizeof(buffer),
-           "BOAT1,%lu,%.6f,%.6f,%.1f,%.2f,%.2f,%.2f,%d,%s",
+           "T:%lu L:%.5f G:%.5f H:%.1f S:%.1f V:%.2f C:%.2f W:%d S:%s",
            millis(),
            gps.latitude,
            gps.longitude,

@@ -65,3 +65,9 @@ PowerData readPowerSensor(SensorID id) {
 
   return data;
 }
+
+// === New helper for convenience ===
+float getBatteryVoltage() {
+  PowerData data = readPowerSensor(SENSOR_BATTERY);
+  return data.valid ? data.voltage : 0.0;
+}
